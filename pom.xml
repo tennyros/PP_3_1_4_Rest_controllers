@@ -9,10 +9,10 @@
 		<relativePath/>
 	</parent>
 	<groupId>ru.kata</groupId>
-	<artifactId>spring-boot_security-demo</artifactId>
+	<artifactId>spring-boot_rest_js</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>spring-boot_security_bootstrap</name>
-	<description>Project for Spring Boot Bootstrap</description>
+	<name>spring-boot_rest_js</name>
+	<description>Project for Spring Boot Rest JS</description>
 
 	<properties>
 		<java.version>11</java.version>
@@ -82,6 +82,12 @@
 			<artifactId>mapstruct</artifactId>
 			<version>${org.mapstruct.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-ui</artifactId>
+			<version>1.6.6</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>

@@ -1,0 +1,28 @@
+# Standard format
+* text=auto
+
+# LF (Unix) for texts
+*.java text
+*.xml text
+*.properties text
+*.yaml text
+*.yml text
+*.txt text
+*.md text
+*.sh text
+
+# CRLF for Windows
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# For binaries
+*.png binary
+*.jpg binary
+*.gif binary
+*.zip binary
+*.jar binary
+*.class binary
+*.exe binary
+
+# LF for scripts
+*.sh eol=lf
