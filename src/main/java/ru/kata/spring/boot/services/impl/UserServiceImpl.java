@@ -23,11 +23,11 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public void addUser(User user) {
+    public User addUser(User user) {
         boolean isAdmin = user.getRoles().stream()
                 .anyMatch(role -> "ROLE_ADMIN".equals(role.getRoleName()));
         user.setAdmin(isAdmin);
-        userRepository.save(user);
+        return userRepository.save(user);
     }
 
     @Override
@@ -50,8 +50,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public User getUserById(Long id) {
-        return userRepository.findById(id).orElse(null);
+    public Optional<User> getUserById(Long id) {
+        return userRepository.findById(id);
     }
 
     @Override

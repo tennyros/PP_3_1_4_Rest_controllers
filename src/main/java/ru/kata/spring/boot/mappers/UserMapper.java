@@ -1,11 +1,18 @@
 package ru.kata.spring.boot.mappers;
 
 import org.mapstruct.Mapper;
-import ru.kata.spring.boot.dtos.UserDto;
+import org.mapstruct.Mapping;
+import ru.kata.spring.boot.dtos.UserRequestDto;
+import ru.kata.spring.boot.dtos.UserResponseDto;
 import ru.kata.spring.boot.models.User;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
-    UserDto toUserDto(User user);
-    User toUserEntity(UserDto userDto);
+
+    User toUserEntity(UserRequestDto userRequestDto);
+    UserRequestDto toRequestDto(User user);
+
+    @Mapping(target = "password", ignore = true)
+    User toUserEntity(UserResponseDto userResponseDto);
+    UserResponseDto toUserResponseDto(User user);
 }

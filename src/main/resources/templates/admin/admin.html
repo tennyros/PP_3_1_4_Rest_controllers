@@ -43,7 +43,7 @@
                             <div class="modal fade" id="userEditModal" tabindex="-1" aria-labelledby="userEditModalLabel" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
-                                        <form th:method="post" th:action="@{/admin/update}" th:object="${userDto}">
+                                        <form th:method="post" th:action="@{/admin/update}" th:object="${userRequestDto}">
                                             <input type="hidden" th:field="*{id}" id="id"/>
                                             <div class="modal-header">
                                                 <h5 class="modal-title" id="userEditModalLabel">Edit user</h5>
@@ -71,7 +71,7 @@
                         <h5 class="card-header">Add new user</h5>
                         <div class="card-body">
                             <div class="form-container">
-                                <form th:method="post" th:action="@{/admin/new_user}" th:object="${userDto}" style="display:inline;">
+                                <form th:method="post" th:action="@{/admin/new_user}" th:object="${userRequestDto}" style="display:inline;">
                                     <div th:replace="admin/fragments/user-form :: form"></div>
                                     <button type="submit" class="btn btn-success btn-center">Add new user</button>
                                 </form>

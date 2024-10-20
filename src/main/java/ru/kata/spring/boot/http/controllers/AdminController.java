@@ -7,7 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import ru.kata.spring.boot.dtos.UserDto;
+import ru.kata.spring.boot.dtos.UserRequestDto;
 import ru.kata.spring.boot.exceptions.UserNotFoundException;
 import ru.kata.spring.boot.models.User;
 import ru.kata.spring.boot.services.RegistrationService;
@@ -28,8 +28,8 @@ public class AdminController {
     private static final Logger log = LoggerFactory.getLogger(AdminController.class);
 
     private final UserService userService;
-    private final RoleService roleService;
     private final RegistrationService registrationService;
+    private final RoleService roleService;
     private final UserValidator userValidator;
     private final UserMapper userMapper;
 
@@ -44,50 +44,50 @@ public class AdminController {
     public String adminFullInfo(Model model) {
         List<User> users = userService.getAllUsers();
         model.addAttribute(USERS, users);
-        model.addAttribute("userDto", new UserDto());
+        model.addAttribute("userRequestDto", new UserRequestDto());
         model.addAttribute(ROLES, roleService.getAllRoles());
         return ADMIN_PAGE;
     }
 
     @PostMapping(value = "/new_user")
-    public String registrationExecution(@Valid @ModelAttribute("userDto") UserDto userDto,
+    public String registrationExecution(@Valid @ModelAttribute("userRequestDto") UserRequestDto userRequestDto,
                                         BindingResult result, Model model) {
-        userValidator.validate(userDto, result);
+        userValidator.validate(userRequestDto, result);
         if (result.hasErrors()) {
             model.addAttribute(ROLES, roleService.getAllRoles());
             model.addAttribute(USERS, userService.getAllUsers());
             model.addAttribute("activeTab", "new-user");
             return ADMIN_PAGE;
         }
-        User user = userMapper.toUserEntity(userDto);
+        User user = userMapper.toUserEntity(userRequestDto);
         registrationService.register(user);
         return REDIRECT_ADMIN_PAGE;
     }
 
 
     @PostMapping(value = "/update")
-    public String updateUserExecution(@Valid @ModelAttribute("userDto") UserDto userDto,
+    public String updateUserExecution(@Valid @ModelAttribute("userRequestDto") UserRequestDto userRequestDto,
                                       BindingResult result, Model model) {
-        userValidator.validate(userDto, result);
+        userValidator.validate(userRequestDto, result);
         if (result.hasErrors()) {
             model.addAttribute(ROLES, roleService.getAllRoles());
             model.addAttribute(USERS, userService.getAllUsers());
             return ADMIN_PAGE;
         }
-        User user = userMapper.toUserEntity(userDto);
+        User user = userMapper.toUserEntity(userRequestDto);
         userService.updateUser(user);
         return REDIRECT_ADMIN_PAGE;
     }
 
     @PostMapping(value = "/delete")
-    public String deleteUser(@ModelAttribute("userDto") UserDto userDto, Principal principal, Model model) {
+    public String deleteUser(@ModelAttribute("userRequestDto") UserRequestDto userRequestDto, Principal principal, Model model) {
         User currentUser = userService.getUserByEmail(principal.getName())
                 .orElseThrow(() -> {
                     log.error("Current user is not found for principal {}", principal.getName());
                     return new UserNotFoundException("Current user now found!");
                 });
-        Long userId = userDto.getId();
-        User userToDelete = userService.getUserById(userId);
+        Long userId = userRequestDto.getId();
+        User userToDelete = userService.getUserById(userId).orElseThrow(UserNotFoundException::new);
         if (userToDelete.getId() == 1) {
             model.addAttribute(ERROR_MESSAGE, "You cannot delete the super administrator!");
             model.addAttribute(USERS, userService.getAllUsers());

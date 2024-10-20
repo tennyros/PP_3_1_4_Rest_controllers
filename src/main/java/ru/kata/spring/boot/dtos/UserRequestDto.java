@@ -1,6 +1,5 @@
 package ru.kata.spring.boot.dtos;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import ru.kata.spring.boot.models.Role;
 
@@ -13,7 +12,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class UserDto {
+public class UserRequestDto {
 
     private Long id;
 
@@ -27,12 +26,10 @@ public class UserDto {
 
     @NotBlank(message = "Password must be defined!")
     @Size(min = 6, max = 18, message = "Password must be from 6 to 18 symbols long!")
-    @JsonIgnore
     private String password;
 
     @Transient
     @NotBlank(message = "Please, confirm your password!")
-    @JsonIgnore
     private String passwordConfirm;
 
     @NotBlank(message = "Email must be defined!")
@@ -45,7 +42,7 @@ public class UserDto {
     private Integer age;
 
     @NotEmpty(message = "Role must be selected!")
-    private Set<RoleDto> roles;
+    private Set<Role> roles;
 
     @Transient
     private boolean admin;
