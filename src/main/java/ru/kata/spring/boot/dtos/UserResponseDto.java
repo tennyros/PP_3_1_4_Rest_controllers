@@ -3,7 +3,6 @@ package ru.kata.spring.boot.dtos;
 import lombok.*;
 import ru.kata.spring.boot.models.Role;
 
-import javax.persistence.Transient;
 import javax.validation.constraints.*;
 import java.util.Set;
 
@@ -36,6 +35,5 @@ public class UserResponseDto {
     @NotEmpty(message = "Role must be selected!")
     private Set<Role> roles;
 
-    @Transient
     private boolean admin;
 }

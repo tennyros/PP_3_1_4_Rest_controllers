@@ -1,5 +1,6 @@
 package ru.kata.spring.boot.services;
 
+import ru.kata.spring.boot.dtos.UserRequestDto;
 import ru.kata.spring.boot.models.User;
 
 import java.util.List;
@@ -12,4 +13,5 @@ public interface UserService {
     Optional<User> getUserById(Long id);
     List<User> getAllUsers();
     Optional<User> getUserByEmail(String email);
+    User mapAndSetRoles(UserRequestDto userRequestDto, User userForSaving);
 }

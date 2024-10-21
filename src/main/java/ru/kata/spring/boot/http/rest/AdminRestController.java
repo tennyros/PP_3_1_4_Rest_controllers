@@ -2,7 +2,6 @@ package ru.kata.spring.boot.http.rest;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -10,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.kata.spring.boot.dtos.UserRequestDto;
 import ru.kata.spring.boot.dtos.UserResponseDto;
+import ru.kata.spring.boot.exceptions.UserNotCreatedException;
 import ru.kata.spring.boot.exceptions.UserNotFoundException;
 import ru.kata.spring.boot.mappers.UserMapper;
 import ru.kata.spring.boot.models.User;
@@ -41,7 +41,7 @@ public class AdminRestController {
         return ResponseEntity.ok(userResponseDTOs);
     }
 
-    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public UserResponseDto getUser(@PathVariable("id") Long id) {
         return userMapper.toUserResponseDto(userService.getUserById(id)
@@ -50,20 +50,31 @@ public class AdminRestController {
 
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
-    public UserRequestDto createUser(@Valid @RequestBody UserRequestDto userRequestDto) {
+    public UserRequestDto createUser(@Valid @RequestBody UserRequestDto userRequestDto, BindingResult result) {
+        userValidator.validate(userRequestDto, result);
+        if (result.hasErrors()) {
+            StringBuilder errorMsg = new StringBuilder();
+            List<FieldError> errors = result.getFieldErrors();
+            for (FieldError error : errors) {
+                errorMsg.append(error.getField())
+                        .append(" - ").append(error.getDefaultMessage())
+                        .append(";");
+            }
+            throw new UserNotCreatedException(errorMsg.toString());
+        }
         User userForCreate = userService.addUser(userMapper.toUserEntity(userRequestDto));
         return userMapper.toRequestDto(userForCreate);
     }
 
-    @PutMapping(value = "/{id}")
+    @PutMapping( "/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public UserResponseDto updateUser(@PathVariable("id") Long id, @Valid @RequestBody UserResponseDto userResponseDto,
+    public UserResponseDto updateUser(@PathVariable("id") Long id, @Valid @RequestBody UserRequestDto userRequestDto,
                                       BindingResult result) {
+        userValidator.validate(userRequestDto, result);
         User userForUpdate = userService.getUserById(id).orElseThrow(UserNotFoundException::new);
-        if (!id.equals(userResponseDto.getId())) {
+        if (!id.equals(userRequestDto.getId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
-        userValidator.validate(userResponseDto, result);
         if (result.hasErrors()) {
             StringBuilder errorMsg = new StringBuilder();
             List<FieldError> errors = result.getFieldErrors();
@@ -74,17 +85,14 @@ public class AdminRestController {
             }
             throw new UserNotFoundException(errorMsg.toString());
         }
-        userService.updateUser(userMapper.toUserEntity(userResponseDto));
+        userForUpdate = userService.mapAndSetRoles(userRequestDto, userForUpdate);
+        userService.updateUser(userForUpdate);
         return userMapper.toUserResponseDto(userForUpdate);
     }
 
-    @DeleteMapping(value = "/{id}")
+    @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@PathVariable("id") Long id) {
-        try {
-            userService.deleteUser(id);
-        } catch (ResponseStatusException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-        }
+        userService.deleteUser(id);
     }
 }

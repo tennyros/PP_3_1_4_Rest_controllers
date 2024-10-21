@@ -1,4 +1,4 @@
-package ru.kata.spring.boot.handlers;
+package ru.kata.spring.boot.http.handlers;
 
 import lombok.*;
 

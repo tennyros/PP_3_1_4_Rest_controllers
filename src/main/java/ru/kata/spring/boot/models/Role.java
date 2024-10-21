@@ -20,6 +20,7 @@ public class Role implements GrantedAuthority {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "role_id", nullable = false, updatable = false, unique = true)
+    @JsonIgnore
     private Long id;
 
     @NotBlank(message = "Role must be defined!")

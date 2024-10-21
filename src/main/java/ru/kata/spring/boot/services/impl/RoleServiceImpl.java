@@ -7,6 +7,7 @@ import ru.kata.spring.boot.models.Role;
 import ru.kata.spring.boot.repositories.RoleRepository;
 import ru.kata.spring.boot.services.RoleService;
 
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -23,7 +24,7 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     @Transactional(readOnly = true)
-    public Role getRoleByName(String roleName) {
+    public Optional<Role> getRoleByName(String roleName) {
         return roleRepository.findByRoleName(roleName);
     }
 

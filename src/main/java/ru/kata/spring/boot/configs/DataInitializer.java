@@ -6,6 +6,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import ru.kata.spring.boot.exceptions.RoleNotFoundException;
 import ru.kata.spring.boot.models.Role;
 import ru.kata.spring.boot.models.User;
 import ru.kata.spring.boot.services.RoleService;
@@ -45,7 +46,7 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void createRoles(String roleName) {
-        if (roleService.getRoleByName(roleName) == null) {
+        if (roleService.getRoleByName(roleName).isEmpty()) {
             roleService.addRole(new Role(roleName));
         }
     }
@@ -58,8 +59,8 @@ public class DataInitializer implements CommandLineRunner {
             admin.setPassword(passwordEncoder.encode(password));
             admin.setEmail(email);
             admin.setAge(age);
-            admin.setRoles(Set.of(roleService.getRoleByName("ROLE_ADMIN"),
-                    roleService.getRoleByName("ROLE_USER")));
+            admin.setRoles(Set.of(roleService.getRoleByName("ROLE_ADMIN").orElseThrow(RoleNotFoundException::new),
+                    roleService.getRoleByName("ROLE_USER").orElseThrow(RoleNotFoundException::new)));
             admin.setAdmin(true);
             userService.addUser(admin);
         }

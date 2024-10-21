@@ -28,7 +28,6 @@ public class UserRequestDto {
     @Size(min = 6, max = 18, message = "Password must be from 6 to 18 symbols long!")
     private String password;
 
-    @Transient
     @NotBlank(message = "Please, confirm your password!")
     private String passwordConfirm;
 
@@ -44,7 +43,6 @@ public class UserRequestDto {
     @NotEmpty(message = "Role must be selected!")
     private Set<Role> roles;
 
-    @Transient
     private boolean admin;
 }
 
