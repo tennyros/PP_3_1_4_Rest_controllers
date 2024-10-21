@@ -10,12 +10,12 @@ import ru.kata.spring.boot.models.User;
 @Mapper(componentModel = "spring")
 public interface UserMapper {
 
-    User toUserEntity(UserRequestDto userRequestDto);
+    User requestToEntity(UserRequestDto userRequestDto);
     UserRequestDto toRequestDto(User user);
     @Mapping(target = "roles", ignore = true)
     void updateUserFromDto(UserRequestDto userRequestDto, @MappingTarget User user);
 
     @Mapping(target = "password", ignore = true)
-    User toUserEntity(UserResponseDto userResponseDto);
-    UserResponseDto toUserResponseDto(User user);
+    User responseToEntity(UserResponseDto userResponseDto);
+    UserResponseDto toResponseDto(User user);
 }

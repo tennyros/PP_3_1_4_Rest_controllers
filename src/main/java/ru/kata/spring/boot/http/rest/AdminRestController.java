@@ -1,6 +1,8 @@
 package ru.kata.spring.boot.http.rest;
 
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +20,7 @@ import ru.kata.spring.boot.exceptions.UserNotFoundException;
 import ru.kata.spring.boot.exceptions.UserValidationException;
 import ru.kata.spring.boot.mappers.UserMapper;
 import ru.kata.spring.boot.models.User;
+import ru.kata.spring.boot.services.RegistrationService;
 import ru.kata.spring.boot.services.UserService;
 import ru.kata.spring.boot.utils.UserValidator;
 
@@ -30,9 +33,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AdminRestController {
 
+    private static final Logger log = LoggerFactory.getLogger(AdminRestController.class);
     private final UserService userService;
     private final UserMapper userMapper;
     private final UserValidator userValidator;
+    private final RegistrationService registrationService;
 
     @GetMapping()
     public ResponseEntity<List<UserResponseDto>> getUsers() {
@@ -41,7 +46,7 @@ public class AdminRestController {
             return ResponseEntity.noContent().build();
         }
         List<UserResponseDto> userResponseDTOs = users.stream()
-                .map(userMapper::toUserResponseDto)
+                .map(userMapper::toResponseDto)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(userResponseDTOs);
     }
@@ -49,22 +54,23 @@ public class AdminRestController {
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public UserResponseDto getUser(@PathVariable("id") Long id) {
-        return userMapper.toUserResponseDto(userService.getUserById(id)
+        return userMapper.toResponseDto(userService.getUserById(id)
                 .orElseThrow(UserNotFoundException::new));
     }
 
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
-    public UserRequestDto createUser(@Validated(OnCreate.class) @Valid
-                                         @RequestBody UserRequestDto userRequestDto, BindingResult result) {
+    public UserResponseDto createUser(@Validated(OnCreate.class) @Valid @RequestBody
+                                         UserRequestDto userRequestDto, BindingResult result) {
 
         userValidator.validate(userRequestDto, result);
         if (result.hasErrors()) {
             throw new UserNotCreatedException(validationErrorMessageInit(result).toString());
         }
-        User userEntity = userMapper.toUserEntity(userRequestDto);
-        User userForCreate = userService.addUser(userEntity);
-        return userMapper.toRequestDto(userForCreate);
+        User userEntity = userMapper.requestToEntity(userRequestDto);
+        userService.mapRolesForNewUser(userRequestDto, userEntity);
+        registrationService.register(userEntity);
+        return userMapper.toResponseDto(userEntity);
     }
 
     @PutMapping( "/{id}")
@@ -81,10 +87,10 @@ public class AdminRestController {
         if (!id.equals(userRequestDto.getId())) {
             throw new UserIdMismatchException();
         }
-        userService.mapAndSaveRoles(userRequestDto, userForUpdate);
+        userService.mapAndUpdateRoles(userRequestDto, userForUpdate);
         userMapper.updateUserFromDto(userRequestDto, userForUpdate);
         userService.updateUser(userForUpdate);
-        return userMapper.toUserResponseDto(userForUpdate);
+        return userMapper.toResponseDto(userForUpdate);
     }
 
     private StringBuilder validationErrorMessageInit(BindingResult result) {

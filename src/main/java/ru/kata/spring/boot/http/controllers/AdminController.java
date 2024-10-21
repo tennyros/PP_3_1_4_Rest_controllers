@@ -59,7 +59,7 @@ public class AdminController {
             model.addAttribute("activeTab", "new-user");
             return ADMIN_PAGE;
         }
-        User user = userMapper.toUserEntity(userRequestDto);
+        User user = userMapper.requestToEntity(userRequestDto);
         registrationService.register(user);
         return REDIRECT_ADMIN_PAGE;
     }
@@ -74,7 +74,7 @@ public class AdminController {
             model.addAttribute(USERS, userService.getAllUsers());
             return ADMIN_PAGE;
         }
-        User user = userMapper.toUserEntity(userRequestDto);
+        User user = userMapper.requestToEntity(userRequestDto);
         userService.updateUser(user);
         return REDIRECT_ADMIN_PAGE;
     }

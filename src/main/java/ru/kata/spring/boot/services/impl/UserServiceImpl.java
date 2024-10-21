@@ -32,11 +32,11 @@ public class UserServiceImpl implements UserService {
     private final RoleRepository roleRepository;
 
     @Override
-    public User addUser(User user) {
+    public void addUser(User user) {
         boolean isAdmin = user.getRoles().stream()
                 .anyMatch(role -> "ROLE_ADMIN".equals(role.getRoleName()));
         user.setAdmin(isAdmin);
-        return userRepository.save(user);
+        userRepository.save(user);
     }
 
     @Override
@@ -76,48 +76,41 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-//    public User mapAndUpdateRoles(UserRequestDto userRequestDto, User userForSaving) {
-//        Set<Role> roles = userRequestDto.getRoles().stream()
-//                .map(roleDto -> roleRepository.findByRoleName(roleDto.getRoleName())
-//                        .orElseThrow(RoleNotFoundException::new))
-//                .collect(Collectors.toSet());
-//        userForSaving.setRoles(roles);
-//        return userForSaving;
-//    }
-    public void mapAndSaveRoles(UserRequestDto userRequestDto, User userFroUpdate) {
-        // Получаем текущие роли пользователя из базы данных
+    public void mapRolesForNewUser(UserRequestDto userRequestDto, User newUser) {
+        Set<String> requestRoleNames = userRequestDto.getRoles().stream()
+                .map(Role::getRoleName)
+                .collect(Collectors.toSet());
+
+        Set<Role> requestedRoles = requestRoleNames.stream()
+                .map(roleName -> roleRepository.findByRoleName(roleName)
+                        .orElseThrow(RoleNotFoundException::new))
+                .collect(Collectors.toSet());
+
+        newUser.setRoles(requestedRoles);
+    }
+
+    public void mapAndUpdateRoles(UserRequestDto userRequestDto, User userFroUpdate) {
         Set<Role> currentRoles = userRepository.getById(userRequestDto.getId()).getRoles();
 
-        // Получаем роли из запроса
         Set<String> requestedRoleNames = userRequestDto.getRoles().stream()
                 .map(Role::getRoleName)
                 .collect(Collectors.toSet());
 
-        // Получаем роли по именам из базы данных
         Set<Role> requestedRoles = requestedRoleNames.stream()
                 .map(roleName -> roleRepository.findByRoleName(roleName)
                         .orElseThrow(RoleNotFoundException::new))
                 .collect(Collectors.toSet());
 
-        // Определяем роли, которые нужно добавить
         Set<Role> rolesToAdd = requestedRoles.stream()
                 .filter(role -> !currentRoles.contains(role))
                 .collect(Collectors.toSet());
 
-        // Определяем роли, которые нужно удалить
         Set<Role> rolesToRemove = currentRoles.stream()
                 .filter(role -> !requestedRoles.contains(role))
                 .collect(Collectors.toSet());
 
-        // Добавляем новые роли к пользователю
         currentRoles.addAll(rolesToAdd);
-
-        // Удаляем ненужные роли
         currentRoles.removeAll(rolesToRemove);
-
-        // Обновляем роли пользователя
-        userRequestDto.setRoles(currentRoles);
-
         userRequestDto.setRoles(currentRoles);
     }
 }

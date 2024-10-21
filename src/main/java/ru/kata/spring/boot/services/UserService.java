@@ -8,12 +8,13 @@ import java.util.Optional;
 
 public interface UserService {
 
-    User addUser(User user);
+    void addUser(User user);
     void updateUser(User user);
     void deleteUser(Long id);
     Optional<User> getUserById(Long id);
     List<User> getAllUsers();
     Optional<User> getUserByEmail(String email);
 
-    void mapAndSaveRoles(UserRequestDto userRequestDto, User userForUpdate);
+    void mapAndUpdateRoles(UserRequestDto userRequestDto, User userForUpdate);
+    void mapRolesForNewUser(UserRequestDto userRequestDto, User newUser);
 }
