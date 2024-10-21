@@ -1,5 +1,6 @@
 package ru.kata.spring.boot.dtos;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import ru.kata.spring.boot.models.Role;
 
@@ -14,6 +15,8 @@ import java.util.Set;
 @ToString
 public class UserRequestDto {
 
+    @Null(groups = OnCreate.class)
+    @NotNull(groups = OnUpdate.class)
     private Long id;
 
     @NotBlank(message = "Username must be defined!")
@@ -42,7 +45,5 @@ public class UserRequestDto {
 
     @NotEmpty(message = "Role must be selected!")
     private Set<Role> roles;
-
-    private boolean admin;
 }
 

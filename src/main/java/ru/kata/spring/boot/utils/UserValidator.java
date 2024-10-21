@@ -1,6 +1,8 @@
 package ru.kata.spring.boot.utils;
 
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
@@ -14,6 +16,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserValidator implements Validator {
 
+    private static final Logger log = LoggerFactory.getLogger(UserValidator.class);
     private final UserService userService;
 
     @Override
@@ -26,6 +29,8 @@ public class UserValidator implements Validator {
         UserRequestDto userRequestDto = (UserRequestDto) target;
 
         Optional<User> userByEmail = userService.getUserByEmail(userRequestDto.getEmail());
+//        log.info("UserRequestDTOs id: {}", userRequestDto.getId());
+//        log.info("UserByEmail id: {}", userByEmail.get().getId());
         if (userByEmail.isPresent() && !userByEmail.get().getId().equals(userRequestDto.getId())) {
             errors.rejectValue("email", "", "User with such email is already exists!");
         }

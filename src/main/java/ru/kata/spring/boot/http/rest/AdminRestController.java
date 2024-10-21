@@ -1,16 +1,21 @@
 package ru.kata.spring.boot.http.rest;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
+import ru.kata.spring.boot.dtos.OnCreate;
+import ru.kata.spring.boot.dtos.OnUpdate;
 import ru.kata.spring.boot.dtos.UserRequestDto;
 import ru.kata.spring.boot.dtos.UserResponseDto;
+import ru.kata.spring.boot.exceptions.UserIdMismatchException;
 import ru.kata.spring.boot.exceptions.UserNotCreatedException;
 import ru.kata.spring.boot.exceptions.UserNotFoundException;
+import ru.kata.spring.boot.exceptions.UserValidationException;
 import ru.kata.spring.boot.mappers.UserMapper;
 import ru.kata.spring.boot.models.User;
 import ru.kata.spring.boot.services.UserService;
@@ -50,49 +55,56 @@ public class AdminRestController {
 
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
-    public UserRequestDto createUser(@Valid @RequestBody UserRequestDto userRequestDto, BindingResult result) {
+    public UserRequestDto createUser(@Validated(OnCreate.class) @Valid
+                                         @RequestBody UserRequestDto userRequestDto, BindingResult result) {
+
         userValidator.validate(userRequestDto, result);
         if (result.hasErrors()) {
-            StringBuilder errorMsg = new StringBuilder();
-            List<FieldError> errors = result.getFieldErrors();
-            for (FieldError error : errors) {
-                errorMsg.append(error.getField())
-                        .append(" - ").append(error.getDefaultMessage())
-                        .append(";");
-            }
-            throw new UserNotCreatedException(errorMsg.toString());
+            throw new UserNotCreatedException(validationErrorMessageInit(result).toString());
         }
-        User userForCreate = userService.addUser(userMapper.toUserEntity(userRequestDto));
+        User userEntity = userMapper.toUserEntity(userRequestDto);
+        User userForCreate = userService.addUser(userEntity);
         return userMapper.toRequestDto(userForCreate);
     }
 
     @PutMapping( "/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public UserResponseDto updateUser(@PathVariable("id") Long id, @Valid @RequestBody UserRequestDto userRequestDto,
-                                      BindingResult result) {
-        userValidator.validate(userRequestDto, result);
+    public UserResponseDto updateUser(@Validated(OnUpdate.class) @PathVariable("id") Long id,
+                                      @Valid @RequestBody UserRequestDto userRequestDto, BindingResult result) {
+
+//        User userForUpdate = userService.getUserById(userRequestDto.getId()).orElseThrow(UserNotFoundException::new);
         User userForUpdate = userService.getUserById(id).orElseThrow(UserNotFoundException::new);
-        if (!id.equals(userRequestDto.getId())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-        }
+        userValidator.validate(userRequestDto, result);
         if (result.hasErrors()) {
-            StringBuilder errorMsg = new StringBuilder();
-            List<FieldError> errors = result.getFieldErrors();
-            for (FieldError error : errors) {
-                errorMsg.append(error.getField())
-                        .append(" - ").append(error.getDefaultMessage())
-                        .append(";");
-            }
-            throw new UserNotFoundException(errorMsg.toString());
+            throw new UserValidationException(validationErrorMessageInit(result).toString());
         }
-        userForUpdate = userService.mapAndSetRoles(userRequestDto, userForUpdate);
+        if (!id.equals(userRequestDto.getId())) {
+            throw new UserIdMismatchException();
+        }
+        userService.mapAndSaveRoles(userRequestDto, userForUpdate);
+        userMapper.updateUserFromDto(userRequestDto, userForUpdate);
         userService.updateUser(userForUpdate);
         return userMapper.toUserResponseDto(userForUpdate);
+    }
+
+    private StringBuilder validationErrorMessageInit(BindingResult result) {
+        StringBuilder errorMsg = new StringBuilder();
+        List<FieldError> errors = result.getFieldErrors();
+        for (FieldError error : errors) {
+            errorMsg.append(error.getField())
+                    .append(" - ").append(error.getDefaultMessage())
+                    .append(";");
+        }
+        return errorMsg;
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@PathVariable("id") Long id) {
-        userService.deleteUser(id);
+        try {
+            userService.deleteUser(id);
+        } catch (EmptyResultDataAccessException e) {
+            throw new UserNotFoundException();
+        }
     }
 }

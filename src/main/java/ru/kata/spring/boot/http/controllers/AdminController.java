@@ -84,7 +84,7 @@ public class AdminController {
         User currentUser = userService.getUserByEmail(principal.getName())
                 .orElseThrow(() -> {
                     log.error("Current user is not found for principal {}", principal.getName());
-                    return new UserNotFoundException("Current user now found!");
+                    return new UserNotFoundException();
                 });
         Long userId = userRequestDto.getId();
         User userToDelete = userService.getUserById(userId).orElseThrow(UserNotFoundException::new);

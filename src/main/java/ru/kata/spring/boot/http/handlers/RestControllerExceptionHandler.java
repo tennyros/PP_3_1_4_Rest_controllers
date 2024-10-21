@@ -5,9 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-import ru.kata.spring.boot.exceptions.RoleNotFoundException;
-import ru.kata.spring.boot.exceptions.UserNotCreatedException;
-import ru.kata.spring.boot.exceptions.UserNotFoundException;
+import ru.kata.spring.boot.exceptions.*;
 
 import java.time.LocalDateTime;
 
@@ -32,6 +30,25 @@ public class RestControllerExceptionHandler extends ResponseEntityExceptionHandl
         return new ResponseEntity<>(userErrorResponse, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(UserIdMismatchException.class)
+    protected ResponseEntity<UserErrorResponse> handleException(UserIdMismatchException e) {
+        UserErrorResponse userErrorResponse = new UserErrorResponse(
+                e.getMessage(),
+                LocalDateTime.now()
+        );
+        return new ResponseEntity<>(userErrorResponse, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(UserValidationException.class)
+    protected ResponseEntity<UserErrorResponse> handleException(UserValidationException e) {
+        UserErrorResponse userErrorResponse = new UserErrorResponse(
+                e.getMessage(),
+                LocalDateTime.now()
+        );
+        return new ResponseEntity<>(userErrorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(RoleNotFoundException.class)
     protected ResponseEntity<UserErrorResponse> handleException(RoleNotFoundException e) {
         UserErrorResponse userErrorResponse = new UserErrorResponse(
                 e.getMessage(),

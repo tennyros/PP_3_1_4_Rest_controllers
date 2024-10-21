@@ -54,11 +54,7 @@ public class UserServiceImpl implements UserService {
             log.error("You are trying to delete a user with id {} (super administrator)!", id);
             throw new UnsupportedOperationException("You can not delete super administrator!");
         }
-        try {
-            userRepository.deleteById(id);
-        } catch (EmptyResultDataAccessException e) {
-            throw new UserNotFoundException();
-        }
+        userRepository.deleteById(id);
     }
 
     @Override
@@ -80,12 +76,48 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User mapAndSetRoles(UserRequestDto userRequestDto, User userForSaving) {
-        Set<Role> roles = userRequestDto.getRoles().stream()
-                .map(roleDto -> roleRepository.findByRoleName(roleDto.getRoleName())
+//    public User mapAndUpdateRoles(UserRequestDto userRequestDto, User userForSaving) {
+//        Set<Role> roles = userRequestDto.getRoles().stream()
+//                .map(roleDto -> roleRepository.findByRoleName(roleDto.getRoleName())
+//                        .orElseThrow(RoleNotFoundException::new))
+//                .collect(Collectors.toSet());
+//        userForSaving.setRoles(roles);
+//        return userForSaving;
+//    }
+    public void mapAndSaveRoles(UserRequestDto userRequestDto, User userFroUpdate) {
+        // Получаем текущие роли пользователя из базы данных
+        Set<Role> currentRoles = userRepository.getById(userRequestDto.getId()).getRoles();
+
+        // Получаем роли из запроса
+        Set<String> requestedRoleNames = userRequestDto.getRoles().stream()
+                .map(Role::getRoleName)
+                .collect(Collectors.toSet());
+
+        // Получаем роли по именам из базы данных
+        Set<Role> requestedRoles = requestedRoleNames.stream()
+                .map(roleName -> roleRepository.findByRoleName(roleName)
                         .orElseThrow(RoleNotFoundException::new))
                 .collect(Collectors.toSet());
-        userForSaving.setRoles(roles);
-        return userForSaving;
+
+        // Определяем роли, которые нужно добавить
+        Set<Role> rolesToAdd = requestedRoles.stream()
+                .filter(role -> !currentRoles.contains(role))
+                .collect(Collectors.toSet());
+
+        // Определяем роли, которые нужно удалить
+        Set<Role> rolesToRemove = currentRoles.stream()
+                .filter(role -> !requestedRoles.contains(role))
+                .collect(Collectors.toSet());
+
+        // Добавляем новые роли к пользователю
+        currentRoles.addAll(rolesToAdd);
+
+        // Удаляем ненужные роли
+        currentRoles.removeAll(rolesToRemove);
+
+        // Обновляем роли пользователя
+        userRequestDto.setRoles(currentRoles);
+
+        userRequestDto.setRoles(currentRoles);
     }
 }
