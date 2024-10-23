@@ -1,50 +1,52 @@
 <div th:fragment="form">
     <div>
         <label for="user-firstname">First name</label>
-        <input type="text" th:field="*{firstName}" id="user-firstname"
+        <input type="text" id="user-firstname"
                class="form-control" placeholder="First name" minlength="3" maxlength="18" required/><br>
-        <div th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"
-             class="alert alert-danger" role="alert" style="color:red; text-align: center;"></div>
+        <div id="firstName-error" class="alert alert-danger" style="color:red; text-align: center; display: none;"></div>
+<!--        <div th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"-->
+<!--             class="alert alert-danger" role="alert" style="color:red; text-align: center;"></div>-->
     </div>
     <div>
         <label for="user-lastname">Last name</label>
-        <input type="text" th:field="*{lastName}" id="user-lastname"
+        <input type="text" id="user-lastname"
                class="form-control" placeholder="Last name" minlength="3" maxlength="18" required/><br>
-        <div th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"
-             class="alert alert-danger" role="alert" style="color:red; text-align: center;"></div>
+        <div id="lastName-error" class="alert alert-danger" style="color:red; text-align: center; display: none;"></div>
+<!--        <div th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"-->
+<!--             class="alert alert-danger" role="alert" style="color:red; text-align: center;"></div>-->
     </div>
     <div>
         <label for="user-age">Age</label>
-        <input type="number" th:field="*{age}" id="user-age"
+        <input type="number" id="user-age"
                class="form-control" placeholder="Age" min="14" max="125" required/><br>
-        <div th:if="${#fields.hasErrors('age')}" th:errors="*{age}"
-             class="alert alert-danger" role="alert" style="color:red; text-align: center;"></div>
+        <div id="age-error" class="alert alert-danger" style="color:red; text-align: center; display: none;"></div>
+<!--        <div th:if="${#fields.hasErrors('age')}" th:errors="*{age}"-->
+<!--             class="alert alert-danger" role="alert" style="color:red; text-align: center;"></div>-->
     </div>
     <div>
         <label for="user-email">Email</label>
-        <input type="email" th:field="*{email}" id="user-email"
+        <input type="email" id="user-email"
                class="form-control" placeholder="Email" required/><br>
-        <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}"
-             class="alert alert-danger" role="alert" style="color:red; text-align: center;"></div>
+        <div id="email-error" class="alert alert-danger" style="color:red; text-align: center; display: none;"></div>
+<!--        <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}"-->
+<!--             class="alert alert-danger" role="alert" style="color:red; text-align: center;"></div>-->
     </div>
     <div>
         <label for="password">Password</label>
-        <input type="password" th:field="*{password}" id="password"
-               class="form-control" placeholder="Password" minlength="6" maxlength="18" required/><br>
-        <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}"
-             class="alert alert-danger" role="alert" style="color:red; text-align: center;"></div>
+        <input type="password" id="password"
+               class="form-control password-input" placeholder="Password" minlength="6" maxlength="18" required/><br>
+<!--        <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}"-->
+<!--             class="alert alert-danger" role="alert" style="color:red; text-align: center;"></div>-->
     </div>
     <div>
         <label for="passwordConfirm">Confirm password</label>
-        <input type="password" th:field="*{passwordConfirm}" id="passwordConfirm"
-               class="form-control" placeholder="Confirm password" minlength="6" maxlength="18" required/><br>
-        <div th:if="${#fields.hasErrors('passwordConfirm')}" th:errors="*{passwordConfirm}"
-             class="alert alert-danger" role="alert" style="color:red; text-align: center;"></div>
-        <div id="password-error" class="alert alert-danger" role="alert" style="color:red; text-align: center; display: none;">
+        <input type="password" id="passwordConfirm"
+               class="form-control password-confirm-input" placeholder="Confirm password" minlength="6" maxlength="18" required/><br>
+        <div id="password-error" class="alert alert-danger password-error" role="alert" style="color:red; text-align: center; display: none;">
             Passwords do not match.
         </div>
     </div>
-    <div th:if="*{id != 1}">
+<!--    <div th:if="*{id != 1}">-->
         <label for="roles">Role</label>
         <select multiple class="form-control" th:field="*{roles}" id="roles" size="2" required>
             <option th:each="role : ${roles}"

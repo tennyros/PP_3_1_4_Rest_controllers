@@ -35,7 +35,6 @@ public class AdminController {
 
     private static final String ROLES = "roles";
     private static final String USERS = "users";
-    private static final String ADMIN_ROLE = "ROLE_ADMIN";
     private static final String ADMIN_PAGE = "/admin/admin";
     private static final String REDIRECT_ADMIN_PAGE = "redirect:/admin/admin";
     private static final String ERROR_MESSAGE = "errorMessage";
@@ -95,7 +94,7 @@ public class AdminController {
             return ADMIN_PAGE;
         }
         if (userToDelete.getRoles().stream().anyMatch(role ->
-                role.getAuthority().equals(ADMIN_ROLE)) && currentUser.getId() != 1) {
+                role.getAuthority().equals("ROLE_ADMIN")) && currentUser.getId() != 1) {
             model.addAttribute(ERROR_MESSAGE, "Only super administrator can delete other administrators!");
             model.addAttribute(USERS, userService.getAllUsers());
             model.addAttribute(ROLES, roleService.getAllRoles());

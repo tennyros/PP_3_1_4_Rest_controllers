@@ -13,3 +13,19 @@ label {
     display: block;
     text-align: center;
 }
+
+#edit-user-form-control .alert,
+#edit-user-form-control .form-control {
+    max-width: 250px;
+    margin: 0 auto;
+}
+
+.logout-link {
+    color: gray;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.logout-link:hover {
+    color: white;
+}

@@ -60,7 +60,7 @@ public class AdminRestController {
 
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
-    public UserResponseDto createUser(@Validated(OnCreate.class) @Valid @RequestBody
+    public UserResponseDto createUser(@Valid @Validated(OnCreate.class) @RequestBody
                                          UserRequestDto userRequestDto, BindingResult result) {
 
         userValidator.validate(userRequestDto, result);
@@ -78,7 +78,6 @@ public class AdminRestController {
     public UserResponseDto updateUser(@Validated(OnUpdate.class) @PathVariable("id") Long id,
                                       @Valid @RequestBody UserRequestDto userRequestDto, BindingResult result) {
 
-//        User userForUpdate = userService.getUserById(userRequestDto.getId()).orElseThrow(UserNotFoundException::new);
         User userForUpdate = userService.getUserById(id).orElseThrow(UserNotFoundException::new);
         userValidator.validate(userRequestDto, result);
         if (result.hasErrors()) {
@@ -93,6 +92,16 @@ public class AdminRestController {
         return userMapper.toResponseDto(userForUpdate);
     }
 
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteUser(@PathVariable("id") Long id) {
+        try {
+            userService.deleteUser(id);
+        } catch (EmptyResultDataAccessException e) {
+            throw new UserNotFoundException();
+        }
+    }
+
     private StringBuilder validationErrorMessageInit(BindingResult result) {
         StringBuilder errorMsg = new StringBuilder();
         List<FieldError> errors = result.getFieldErrors();
@@ -102,15 +111,5 @@ public class AdminRestController {
                     .append(";");
         }
         return errorMsg;
-    }
-
-    @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteUser(@PathVariable("id") Long id) {
-        try {
-            userService.deleteUser(id);
-        } catch (EmptyResultDataAccessException e) {
-            throw new UserNotFoundException();
-        }
     }
 }
