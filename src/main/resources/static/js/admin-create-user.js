@@ -28,49 +28,30 @@ function createUser() {
         .then(response => {
             if (!response.ok) {
                 return response.json().then(errors => {
-                    handleErrors(errors);
+                    handleValidationErrors(errors);
+                    throw new Error('Validation or server error!')
                 });
-            } else {
-                alert('User created successfully!')
             }
+            return response.json();
+        })
+        .then(data => {
+            alert('User created successfully!');
+            clearForm();
         })
         .catch(error => {
             console.error('Error creating user:', error)
         });
 }
 
-function handleErrors(errors) {
-    // Проверяем, есть ли ошибки для поля "firstName"
-    if (errors.firstName) {
-        const firstNameErrorDiv = document.querySelector('#firstName-error');
-        firstNameErrorDiv.style.display = 'block'; // Показываем блок с ошибкой
-        firstNameErrorDiv.innerText = errors.firstName; // Отображаем текск ошибки
-    } else {
-        document.querySelector('#firstName-error').style.display = 'none'; // Прячем блок с ошибкой, если её нет
-    }
+function handleValidationErrors(errors) {
+    clearErrors();
 
-    if (errors.lastName) {
-        const lastNameErrorDiv = document.querySelector('#lastName-error');
-        lastNameErrorDiv.style.display = 'block';
-        lastNameErrorDiv.innerText = errors.lastName;
-    } else {
-        document.querySelector('#lastName-error').style.display = 'none';
-    }
-
-    if (errors.age) {
-        const ageErrorDiv = document.querySelector('#age-error');
-        ageErrorDiv.style.display = 'block';
-        ageErrorDiv.innerText = errors.age;
-    } else {
-        document.querySelector('#age-error').style.display = 'none';
-    }
-
-    if (errors.email) {
-        const ageErrorDiv = document.querySelector('#email-error');
-        ageErrorDiv.style.display = 'block';
-        ageErrorDiv.innerText = errors.age;
-    } else {
-        document.querySelector('#email-error').style.display = 'none';
+    for (let field in errors.fieldErrors) {
+        const errorDiv = document.querySelector(`#${field}-error`);
+        if (errorDiv) {
+            errorDiv.style.display = 'block';
+            errorDiv.textContent = errors.fieldErrors[field];
+        }
     }
 }
 
@@ -85,4 +66,11 @@ function getSelectedRoles() {
         }
     }
     return selectedRoles;
+}
+
+function clearErrors() {
+    document.querySelectorAll('.error-message').forEach(errorDiv => {
+        errorDiv.style.display = 'none';
+        errorDiv.textContent = '';
+    })
 }

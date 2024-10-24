@@ -15,7 +15,6 @@ import ru.kata.spring.boot.dtos.OnUpdate;
 import ru.kata.spring.boot.dtos.UserRequestDto;
 import ru.kata.spring.boot.dtos.UserResponseDto;
 import ru.kata.spring.boot.exceptions.UserIdMismatchException;
-import ru.kata.spring.boot.exceptions.UserNotCreatedException;
 import ru.kata.spring.boot.exceptions.UserNotFoundException;
 import ru.kata.spring.boot.exceptions.UserValidationException;
 import ru.kata.spring.boot.mappers.UserMapper;
@@ -26,6 +25,7 @@ import ru.kata.spring.boot.utils.UserValidator;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -65,7 +65,7 @@ public class AdminRestController {
 
         userValidator.validate(userRequestDto, result);
         if (result.hasErrors()) {
-            throw new UserNotCreatedException(validationErrorMessageInit(result).toString());
+            validationErrorMessageInit(result);
         }
         User userEntity = userMapper.requestToEntity(userRequestDto);
         userService.mapRolesForNewUser(userRequestDto, userEntity);
@@ -81,7 +81,7 @@ public class AdminRestController {
         User userForUpdate = userService.getUserById(id).orElseThrow(UserNotFoundException::new);
         userValidator.validate(userRequestDto, result);
         if (result.hasErrors()) {
-            throw new UserValidationException(validationErrorMessageInit(result).toString());
+            validationErrorMessageInit(result);
         }
         if (!id.equals(userRequestDto.getId())) {
             throw new UserIdMismatchException();
@@ -102,14 +102,10 @@ public class AdminRestController {
         }
     }
 
-    private StringBuilder validationErrorMessageInit(BindingResult result) {
-        StringBuilder errorMsg = new StringBuilder();
-        List<FieldError> errors = result.getFieldErrors();
-        for (FieldError error : errors) {
-            errorMsg.append(error.getField())
-                    .append(" - ").append(error.getDefaultMessage())
-                    .append(";");
-        }
-        return errorMsg;
+    private static void validationErrorMessageInit(BindingResult result) {
+        Map<String, String> fieldErrors = result.getFieldErrors().stream()
+                .filter(fieldError -> fieldError.getDefaultMessage() != null)
+                .collect(Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage));
+        throw new UserValidationException(fieldErrors);
     }
 }

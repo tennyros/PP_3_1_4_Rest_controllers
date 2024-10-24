@@ -1,11 +1,16 @@
 package ru.kata.spring.boot.exceptions;
 
-public class UserValidationException extends RuntimeException {
+import lombok.Getter;
 
-    public UserValidationException() {
-    }
+import java.util.Map;
 
-    public UserValidationException(String message) {
-        super(message);
+@Getter
+public class UserValidationException extends BaseException {
+
+    private final Map<String, String> fieldErrors;
+
+    public UserValidationException(Map<String, String> fieldErrors) {
+        super("User validation failed!");
+        this.fieldErrors = fieldErrors;
     }
 }

@@ -1,12 +1,8 @@
 package ru.kata.spring.boot.exceptions;
 
-public class    UserNotFoundException extends RuntimeException {
+public class UserNotFoundException extends BaseException {
 
     public UserNotFoundException() {
-        super("No such user found with given ID!");
-    }
-
-    public UserNotFoundException(String message) {
-        super(message);
+        super("User not found!");
     }
 }

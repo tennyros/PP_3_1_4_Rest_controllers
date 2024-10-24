@@ -1,12 +1,8 @@
 package ru.kata.spring.boot.exceptions;
 
-public class RoleNotFoundException extends RuntimeException {
+public class RoleNotFoundException extends BaseException {
 
     public RoleNotFoundException() {
-        super("There is no such role!");
-    }
-
-    public RoleNotFoundException(String message) {
-        super(message);
+        super("Role not found!");
     }
 }
